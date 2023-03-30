@@ -1,7 +1,9 @@
 package openai
 
 import (
+	"log"
 	"net/http"
+	"net/url"
 )
 
 const (
@@ -22,11 +24,20 @@ type ClientConfig struct {
 }
 
 func DefaultConfig(authToken string) ClientConfig {
+	uri, err := url.Parse("http://127.0.0.1:7890")
+	if err != nil {
+		log.Fatalln(err)
+	}
+
 	return ClientConfig{
-		HTTPClient: &http.Client{},
-		BaseURL:    apiURLv1,
-		OrgID:      "",
-		authToken:  authToken,
+		HTTPClient: &http.Client{
+			Transport: &http.Transport{
+				Proxy: http.ProxyURL(uri),
+			},
+		},
+		BaseURL:   apiURLv1,
+		OrgID:     "",
+		authToken: authToken,
 
 		EmptyMessagesLimit: defaultEmptyMessagesLimit,
 	}
